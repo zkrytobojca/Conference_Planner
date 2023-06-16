@@ -22,7 +22,7 @@ public class Themed_Path implements Serializable {
     @Column
     private String theme;
 
-    @OneToMany(mappedBy = "themed_path", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "themedPath", cascade = CascadeType.REMOVE)
     private List<Lecture> lectures;
 
     @Override
