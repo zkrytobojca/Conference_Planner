@@ -2,7 +2,6 @@ package com.sii.conference.services;
 
 import com.sii.conference.data.Lecture;
 import com.sii.conference.data.Reservation;
-import com.sii.conference.data.Themed_Path;
 import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.ReservationRepository;
 import lombok.RequiredArgsConstructor;

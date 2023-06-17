@@ -30,7 +30,7 @@ public class Lecture implements Serializable {
     private Date endTime;
 
     @ManyToOne(cascade = CascadeType.DETACH)
-    private Themed_Path themedPath;
+    private ThemedPath themedPath;
 
     @OneToMany(mappedBy = "lecture", cascade = CascadeType.REMOVE)
     private List<Reservation> reservations;

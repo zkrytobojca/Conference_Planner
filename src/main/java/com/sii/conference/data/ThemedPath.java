@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Table(name = "THEMED_PATH")
-public class Themed_Path implements Serializable {
+public class ThemedPath implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

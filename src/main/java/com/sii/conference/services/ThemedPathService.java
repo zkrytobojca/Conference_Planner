@@ -1,6 +1,6 @@
 package com.sii.conference.services;
 
-import com.sii.conference.data.Themed_Path;
+import com.sii.conference.data.ThemedPath;
 import com.sii.conference.data.repositories.ThemedPathRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,19 +14,19 @@ public class ThemedPathService {
 
     private final ThemedPathRepository themedPathRepository;
 
-    public void updateOrCreateThemedPath(Themed_Path themedPath) {
+    public void updateOrCreateThemedPath(ThemedPath themedPath) {
         themedPathRepository.save(themedPath);
     }
 
-    public Optional<Themed_Path> findThemedPathById(Integer id) {
-        return themedPathRepository.findThemed_PathById(id);
+    public Optional<ThemedPath> findThemedPathById(Integer id) {
+        return themedPathRepository.findThemedPathById(id);
     }
 
-    public List<Themed_Path> findAll() {
+    public List<ThemedPath> findAll() {
         return themedPathRepository.findAllByOrderByIdAsc();
     }
 
-    public void deleteThemedPath(Themed_Path themedPath) {
+    public void deleteThemedPath(ThemedPath themedPath) {
         themedPathRepository.delete(themedPath);
     }
 }
