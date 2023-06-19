@@ -14,9 +14,23 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void updateOrCreateUser(User user) {
-        userRepository.save(user);
+    public User createUser(User user) {
+        return userRepository.save(user);
     }
+
+    public Optional<User> updateUser(Integer id, User user) {
+        final Optional<User> userOptional = findUserById(id);
+
+        User oldUser = null;
+        if (userOptional.isPresent()) {
+            oldUser = userOptional.get();
+            if (user.getLogin() != null) oldUser.setLogin(user.getLogin());
+            if (user.getEmail() != null) oldUser.setEmail(user.getEmail());
+            return Optional.of(userRepository.save(oldUser));
+        }
+        else return Optional.empty();
+    }
+
     public Optional<User> findUserById(Integer id) {
         return userRepository.findUserById(id);
     }
