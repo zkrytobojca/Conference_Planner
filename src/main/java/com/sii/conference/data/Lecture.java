@@ -1,5 +1,6 @@
 package com.sii.conference.data;
 
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,9 +30,11 @@ public class Lecture implements Serializable {
     @Column(name = "end_time", nullable = false)
     private Date endTime;
 
+    @JsonBackReference
     @ManyToOne(cascade = CascadeType.DETACH)
     private ThemedPath themedPath;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "lecture", cascade = CascadeType.REMOVE)
     private List<Reservation> reservations;
 

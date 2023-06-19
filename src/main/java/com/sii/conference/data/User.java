@@ -1,5 +1,6 @@
 package com.sii.conference.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,7 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String email;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Reservation> reservations;
 

@@ -1,5 +1,6 @@
 package com.sii.conference.data;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +23,7 @@ public class ThemedPath implements Serializable {
     @Column
     private String theme;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "themedPath", cascade = CascadeType.REMOVE)
     private List<Lecture> lectures;
 

@@ -1,5 +1,6 @@
 package com.sii.conference.data;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
