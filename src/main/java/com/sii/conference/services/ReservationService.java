@@ -2,10 +2,13 @@ package com.sii.conference.services;
 
 import com.sii.conference.data.Lecture;
 import com.sii.conference.data.Reservation;
+import com.sii.conference.data.ThemedPath;
 import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.LectureRepository;
 import com.sii.conference.data.repositories.ReservationRepository;
+import com.sii.conference.data.repositories.ThemedPathRepository;
 import com.sii.conference.data.repositories.UserRepository;
+import com.sii.conference.data.statistics.IdPercentStat;
 import com.sii.conference.exceptions.lecture.LectureAlreadyFullException;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
 import com.sii.conference.exceptions.reservation.ReservationAlreadyExistsException;
@@ -15,9 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,8 @@ public class ReservationService {
     private final LectureRepository lectureRepository;
 
     private final UserRepository userRepository;
+
+    private final ThemedPathRepository themedPathRepository;
 
     private final EmailService emailService;
 
@@ -137,5 +140,61 @@ public class ReservationService {
             usersOfLecture.add(reservation.getUser());
         }
         return usersOfLecture;
+    }
+
+    public List<IdPercentStat> getStatisticsAboutLectures()
+    {
+        List<Reservation> reservations = findAll();
+        List<Lecture> lectures = lectureRepository.findAllByOrderByIdAsc();
+
+        Map<Integer, Integer> reservationMap = new HashMap<>();
+        for (Reservation reservation : reservations) {
+            Integer lectureId = reservation.getLecture().getId();
+            if (reservationMap.containsKey(lectureId)) {
+                reservationMap.replace(lectureId, reservationMap.get(lectureId) + 1);
+            } else {
+                reservationMap.put(lectureId, 1);
+            }
+        }
+
+        List<IdPercentStat> statistics = new ArrayList<>();
+
+        for (Lecture lecture : lectures) {
+            Integer lectureId = lecture.getId();
+            if (reservationMap.containsKey(lectureId)) {
+                statistics.add(new IdPercentStat(lectureId, (float)reservationMap.get(lectureId) / reservations.size()));
+            } else {
+                statistics.add(new IdPercentStat(lectureId, 0f));
+            }
+        }
+        return statistics;
+    }
+
+    public List<IdPercentStat> getStatisticsAboutThemedPaths()
+    {
+        List<Reservation> reservations = findAll();
+        List<ThemedPath> themedPaths = themedPathRepository.findAllByOrderByIdAsc();
+
+        Map<Integer, Integer> reservationMap = new HashMap<>();
+        for (Reservation reservation : reservations) {
+            Integer themedPathId = reservation.getLecture().getThemedPath().getId();
+            if (reservationMap.containsKey(themedPathId)) {
+                reservationMap.replace(themedPathId, reservationMap.get(themedPathId) + 1);
+            } else {
+                reservationMap.put(themedPathId, 1);
+            }
+        }
+
+        List<IdPercentStat> statistics = new ArrayList<>();
+
+        for (ThemedPath themedPath : themedPaths) {
+            Integer themedPathId = themedPath.getId();
+            if (reservationMap.containsKey(themedPathId)) {
+                statistics.add(new IdPercentStat(themedPathId, (float)reservationMap.get(themedPathId) / reservations.size()));
+            } else {
+                statistics.add(new IdPercentStat(themedPathId, 0f));
+            }
+        }
+        return statistics;
     }
 }

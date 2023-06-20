@@ -5,6 +5,7 @@ import com.sii.conference.data.Reservation;
 import com.sii.conference.data.User;
 import com.sii.conference.data.elements.ReservationCreationElement;
 import com.sii.conference.data.elements.ReservationCreationLoginEmailElement;
+import com.sii.conference.data.statistics.IdPercentStat;
 import com.sii.conference.exceptions.lecture.LectureAlreadyFullException;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
 import com.sii.conference.exceptions.reservation.ReservationAlreadyExistsException;
@@ -87,14 +88,24 @@ public class ReservationController {
         return ResponseEntity.ok().body(usersOfLecture);
     }
 
+    @GetMapping("/statistics/lectures")
+    public ResponseEntity<List<IdPercentStat>> getStatsLectures() {
+        List<IdPercentStat> statistics = reservationService.getStatisticsAboutLectures();
+        return ResponseEntity.ok().body(statistics);
+    }
+
+    @GetMapping("/statistics/themedPaths")
+    public ResponseEntity<List<IdPercentStat>> getStatsThemedPaths() {
+        List<IdPercentStat> statistics = reservationService.getStatisticsAboutThemedPaths();
+        return ResponseEntity.ok().body(statistics);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> updateReservation(@PathVariable("id") Integer id, @RequestBody Reservation newReservation) {
         try {
             Optional<Reservation> updatedReservation =  reservationService.updateReservation(id, newReservation);
             return ResponseEntity.of(updatedReservation);
-        } catch (NoUserWithThisIDException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (NoLectureWithThisIDException e) {
+        } catch (NoUserWithThisIDException | NoLectureWithThisIDException e) {
             return ResponseEntity.badRequest().build();
         }
     }
