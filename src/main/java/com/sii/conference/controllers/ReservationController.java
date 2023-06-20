@@ -2,6 +2,7 @@ package com.sii.conference.controllers;
 
 import com.sii.conference.data.Lecture;
 import com.sii.conference.data.Reservation;
+import com.sii.conference.data.User;
 import com.sii.conference.data.elements.ReservationCreationElement;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
 import com.sii.conference.exceptions.user.NoUserWithThisIDException;
@@ -57,6 +58,12 @@ public class ReservationController {
     public ResponseEntity<List<Lecture>> getAllLecturesOfUser(@RequestParam String userLogin) {
         List<Lecture> lecturesOfUser = reservationService.findAllLecturesByUserLogin(userLogin);
         return ResponseEntity.ok().body(lecturesOfUser);
+    }
+
+    @GetMapping("/listUsersOfLecture")
+    public ResponseEntity<List<User>> getAllLecturesOfUser(@RequestParam Integer lectureId) {
+        List<User> usersOfLecture = reservationService.findAllUsersByLectureId(lectureId);
+        return ResponseEntity.ok().body(usersOfLecture);
     }
 
     @PutMapping("/{id}")

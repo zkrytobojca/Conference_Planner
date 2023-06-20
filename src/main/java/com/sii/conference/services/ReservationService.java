@@ -101,4 +101,14 @@ public class ReservationService {
         }
         return lecturesOfUser;
     }
+
+    public List<User> findAllUsersByLectureId(Integer lectureId)
+    {
+        List<Reservation> reservationsOfLecture = reservationRepository.findAllByLectureIdOrderByIdAsc(lectureId);
+        List<User> usersOfLecture = new ArrayList<>();
+        for (Reservation reservation : reservationsOfLecture) {
+            usersOfLecture.add(reservation.getUser());
+        }
+        return usersOfLecture;
+    }
 }

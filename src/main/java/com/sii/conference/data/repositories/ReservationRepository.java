@@ -19,4 +19,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByOrderByIdAsc();
 
     List<Reservation> findAllByUserLoginOrderByIdAsc(String login);
+
+    List<Reservation> findAllByLectureIdOrderByIdAsc(Integer lectureId);
 }
