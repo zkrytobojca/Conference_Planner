@@ -2,7 +2,6 @@ package com.sii.conference.services;
 
 import com.sii.conference.data.Lecture;
 import com.sii.conference.data.Reservation;
-import com.sii.conference.data.ThemedPath;
 import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.LectureRepository;
 import com.sii.conference.data.repositories.ReservationRepository;
@@ -10,7 +9,6 @@ import com.sii.conference.data.repositories.UserRepository;
 import com.sii.conference.exceptions.lecture.LectureAlreadyFullException;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
 import com.sii.conference.exceptions.reservation.ReservationAlreadyExistsException;
-import com.sii.conference.exceptions.themedpath.NoThemedPathWithThisIDException;
 import com.sii.conference.exceptions.user.NoUserWithThisIDException;
 import com.sii.conference.exceptions.user.NoUserWithThisLoginAndEmailExistsException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +29,8 @@ public class ReservationService {
 
     private final UserRepository userRepository;
 
+    private final EmailService emailService;
+
     @Value("${lecture.max-reservations}")
     private Integer maxReservations;
 
@@ -49,6 +49,7 @@ public class ReservationService {
             Lecture lecture = lectureOptional.get();
             reservation.setLecture(lecture);
             if (reservationRepository.countByLectureId(lectureId) < maxReservations) {
+                emailService.WriteToFile(user.getEmail(), "You reserved a spot in lecture: " + lecture.getTopic() + ".");
                 return reservationRepository.save(reservation);
             } else {
                 throw new LectureAlreadyFullException("Lecture already full!");
