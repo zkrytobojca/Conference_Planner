@@ -53,6 +53,12 @@ public class ReservationController {
         return ResponseEntity.ok().body(reservationList);
     }
 
+    @GetMapping("/listLecturesOfUser")
+    public ResponseEntity<List<Lecture>> getAllLecturesOfUser(@RequestParam String userLogin) {
+        List<Lecture> lecturesOfUser = reservationService.findAllLecturesByUserLogin(userLogin);
+        return ResponseEntity.ok().body(lecturesOfUser);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> updateReservation(@PathVariable("id") Integer id, @RequestBody Reservation newReservation) {
         try {

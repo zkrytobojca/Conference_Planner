@@ -13,6 +13,7 @@ import com.sii.conference.exceptions.user.NoUserWithThisIDException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,5 +90,15 @@ public class ReservationService {
 
     public void deleteReservation(Reservation reservation) {
         reservationRepository.delete(reservation);
+    }
+
+    public List<Lecture> findAllLecturesByUserLogin(String login)
+    {
+        List<Reservation> reservationsOfUser = reservationRepository.findAllByUserLoginOrderByIdAsc(login);
+        List<Lecture> lecturesOfUser = new ArrayList<>();
+        for (Reservation reservation : reservationsOfUser) {
+            lecturesOfUser.add(reservation.getLecture());
+        }
+        return lecturesOfUser;
     }
 }
