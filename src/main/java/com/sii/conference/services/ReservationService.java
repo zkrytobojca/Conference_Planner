@@ -42,14 +42,30 @@ public class ReservationService {
         }
     }
 
-    public Optional<Reservation> updateReservation(Integer id, Reservation reservation) {
+    public Optional<Reservation> updateReservation(Integer id, Reservation reservation) throws NoUserWithThisIDException, NoLectureWithThisIDException {
         final Optional<Reservation> reservationOptional = findReservationById(id);
 
         Reservation oldReservation = null;
         if (reservationOptional.isPresent()) {
             oldReservation = reservationOptional.get();
-            if (reservation.getUser() != null) oldReservation.setUser(reservation.getUser());
-            if (reservation.getLecture() != null) oldReservation.setLecture(reservation.getLecture());
+            if (reservation.getUser() != null) {
+                Integer userId = reservation.getUser().getId();
+                Optional<User> userOptional = userRepository.findUserById(userId);
+                if (userOptional.isPresent()) {
+                    oldReservation.setUser(userOptional.get());
+                } else {
+                    throw new NoUserWithThisIDException(String.format("User with id {%d} not found", userId));
+                }
+            }
+            if (reservation.getLecture() != null) {
+                Integer lectureId = reservation.getLecture().getId();
+                Optional<Lecture> lectureOptional = lectureRepository.findLectureById(lectureId);
+                if (lectureOptional.isPresent()) {
+                    oldReservation.setLecture(lectureOptional.get());
+                } else {
+                    throw new NoLectureWithThisIDException(String.format("Lecture with id {%d} not found", lectureId));
+                }
+            }
             return Optional.of(reservationRepository.save(oldReservation));
         }
         else return Optional.empty();

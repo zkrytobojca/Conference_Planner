@@ -31,7 +31,7 @@ public class LectureService {
         }
     }
 
-    public Optional<Lecture> updateLecture(Integer id, Lecture lecture) {
+    public Optional<Lecture> updateLecture(Integer id, Lecture lecture) throws NoThemedPathWithThisIDException {
         final Optional<Lecture> lectureOptional = findLectureById(id);
 
         Lecture oldLecture = null;
@@ -40,7 +40,15 @@ public class LectureService {
             if (lecture.getTopic() != null) oldLecture.setTopic(lecture.getTopic());
             if (lecture.getStartTime() != null) oldLecture.setStartTime(lecture.getStartTime());
             if (lecture.getEndTime() != null) oldLecture.setEndTime(lecture.getEndTime());
-            if (lecture.getThemedPath() != null) oldLecture.setThemedPath(lecture.getThemedPath());
+            if (lecture.getThemedPath() != null) {
+                Integer themedPathId = lecture.getThemedPath().getId();
+                Optional<ThemedPath> themedPathOptional = themedPathRepository.findThemedPathById(themedPathId);
+                if (themedPathOptional.isPresent()) {
+                    oldLecture.setThemedPath(themedPathOptional.get());
+                } else {
+                    throw new NoThemedPathWithThisIDException(String.format("Themed Path with id {%d} not found", themedPathId));
+                }
+            }
             return Optional.of(lectureRepository.save(oldLecture));
         }
         else return Optional.empty();
