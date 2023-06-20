@@ -2,6 +2,7 @@ package com.sii.conference.services;
 
 import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.UserRepository;
+import com.sii.conference.exceptions.user.UserWithThisLoginExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +15,14 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public User createUser(User user) throws UserWithThisLoginExistsException {
+        final Optional<User> userOptional = findUserByLogin(user.getLogin());
+
+        if(userOptional.isPresent()) {
+            throw new UserWithThisLoginExistsException("This login is already taken!");
+        } else {
+            return userRepository.save(user);
+        }
     }
 
     public Optional<User> updateUser(Integer id, User user) {

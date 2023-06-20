@@ -1,6 +1,7 @@
 package com.sii.conference.controllers;
 
 import com.sii.conference.data.User;
+import com.sii.conference.exceptions.user.UserWithThisLoginExistsException;
 import com.sii.conference.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +20,20 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<User> addNewUser(@RequestBody User newUser)
+    public ResponseEntity<String> addNewUser(@RequestBody User newUser)
     {
-        User createdUser = userService.createUser(newUser);
+        try {
+            User createdUser = userService.createUser(newUser);
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdUser.getId())
-                .toUri();
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(createdUser.getId())
+                    .toUri();
 
-        return ResponseEntity.created(location).body(createdUser);
+            return ResponseEntity.created(location).body("User created successfully.");
+        } catch (UserWithThisLoginExistsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
