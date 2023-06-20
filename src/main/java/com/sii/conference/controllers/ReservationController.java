@@ -4,8 +4,12 @@ import com.sii.conference.data.Lecture;
 import com.sii.conference.data.Reservation;
 import com.sii.conference.data.User;
 import com.sii.conference.data.elements.ReservationCreationElement;
+import com.sii.conference.data.elements.ReservationCreationLoginEmailElement;
+import com.sii.conference.exceptions.lecture.LectureAlreadyFullException;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
+import com.sii.conference.exceptions.reservation.ReservationAlreadyExistsException;
 import com.sii.conference.exceptions.user.NoUserWithThisIDException;
+import com.sii.conference.exceptions.user.NoUserWithThisLoginAndEmailExistsException;
 import com.sii.conference.services.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +28,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<Reservation> addNewReservation(@RequestBody ReservationCreationElement reservationCreationElement) {
+    public ResponseEntity<String> addNewReservation(@RequestBody ReservationCreationElement reservationCreationElement) {
         try{
             Reservation createdReservation = reservationService.createReservation(new Reservation(), reservationCreationElement.getUserid(), reservationCreationElement.getLectureId());
 
@@ -33,12 +37,29 @@ public class ReservationController {
                     .buildAndExpand(createdReservation.getId())
                     .toUri();
 
-            return ResponseEntity.created(location).body(createdReservation);
+            return ResponseEntity.created(location).body("Reservation created successfully.");
 
-        } catch (NoUserWithThisIDException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (NoLectureWithThisIDException e) {
-            return ResponseEntity.badRequest().build();
+        } catch (NoUserWithThisIDException | NoLectureWithThisIDException | LectureAlreadyFullException |
+        ReservationAlreadyExistsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/createUsingLoginAndEmail")
+    public ResponseEntity<String> addNewReservationUsingLoginAndEmail(@RequestBody ReservationCreationLoginEmailElement reservationCreationElement) {
+        try{
+            Reservation createdReservation = reservationService.createReservation(new Reservation(), reservationCreationElement.getUserLogin(), reservationCreationElement.getUserEmail(), reservationCreationElement.getLectureId());
+
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(createdReservation.getId())
+                    .toUri();
+
+            return ResponseEntity.created(location).body("Reservation created successfully.");
+
+        } catch (NoUserWithThisIDException | NoLectureWithThisIDException | LectureAlreadyFullException |
+                 ReservationAlreadyExistsException | NoUserWithThisLoginAndEmailExistsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

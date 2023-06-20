@@ -7,10 +7,14 @@ import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.LectureRepository;
 import com.sii.conference.data.repositories.ReservationRepository;
 import com.sii.conference.data.repositories.UserRepository;
+import com.sii.conference.exceptions.lecture.LectureAlreadyFullException;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
+import com.sii.conference.exceptions.reservation.ReservationAlreadyExistsException;
 import com.sii.conference.exceptions.themedpath.NoThemedPathWithThisIDException;
 import com.sii.conference.exceptions.user.NoUserWithThisIDException;
+import com.sii.conference.exceptions.user.NoUserWithThisLoginAndEmailExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,19 +31,41 @@ public class ReservationService {
 
     private final UserRepository userRepository;
 
-    public Reservation createReservation(Reservation reservation, Integer userId, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException {
+    @Value("${lecture.max-reservations}")
+    private Integer maxReservations;
+
+    public Reservation createReservation(Reservation reservation, Integer userId, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException, LectureAlreadyFullException, ReservationAlreadyExistsException {
+        Optional<Reservation> reservationOptional = reservationRepository.findReservationByUserIdAndLectureId(userId, lectureId);
         Optional<User> userOptional = userRepository.findUserById(userId);
         Optional<Lecture> lectureOptional = lectureRepository.findLectureById(lectureId);
+
+        if (reservationOptional.isPresent()) {
+            throw new ReservationAlreadyExistsException("Reservation already exists!");
+        }
 
         if (userOptional.isPresent() && lectureOptional.isPresent()) {
             User user = userOptional.get();
             reservation.setUser(user);
             Lecture lecture = lectureOptional.get();
             reservation.setLecture(lecture);
-            return reservationRepository.save(reservation);
+            if (reservationRepository.countByLectureId(lectureId) < maxReservations) {
+                return reservationRepository.save(reservation);
+            } else {
+                throw new LectureAlreadyFullException("Lecture already full!");
+            }
         } else {
             if (userOptional.isEmpty()) throw new NoUserWithThisIDException(String.format("User with id {%d} not found", userId));
             else throw new NoLectureWithThisIDException(String.format("Lecture with id {%d} not found", lectureId));
+        }
+    }
+
+    public Reservation createReservation(Reservation reservation, String userLogin, String userEmail, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException, LectureAlreadyFullException, ReservationAlreadyExistsException, NoUserWithThisLoginAndEmailExistsException {
+        Optional<User> userOptional = userRepository.findUserByLoginAndEmail(userLogin, userEmail);
+
+        if (userOptional.isPresent()) {
+            return createReservation(reservation, userOptional.get().getId(), lectureId);
+        } else {
+            throw new NoUserWithThisLoginAndEmailExistsException("User with given login and email does not exist!");
         }
     }
 

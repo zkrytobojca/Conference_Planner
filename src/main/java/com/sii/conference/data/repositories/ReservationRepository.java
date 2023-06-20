@@ -12,6 +12,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findReservationById(Integer id);
 
+    Optional<Reservation> findReservationByUserIdAndLectureId(Integer userid, Integer lectureId);
+
     List<Reservation> findAllByUserOrderByIdAsc(User user);
 
     List<Reservation> findAllByLectureOrderByIdAsc(Lecture lecture);
@@ -21,4 +23,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByUserLoginOrderByIdAsc(String login);
 
     List<Reservation> findAllByLectureIdOrderByIdAsc(Integer lectureId);
+
+    Integer countByLectureId(Integer lectureId);
 }
