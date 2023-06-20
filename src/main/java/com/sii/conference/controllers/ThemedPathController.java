@@ -19,7 +19,7 @@ public class ThemedPathController {
     private final ThemedPathService themedPathService;
 
     @PostMapping
-    public ResponseEntity<ThemedPath> addNewThemedPath(@RequestBody ThemedPath newThemedPath)
+    public ResponseEntity<String> addNewThemedPath(@RequestBody ThemedPath newThemedPath)
     {
         ThemedPath createdThemedPath = themedPathService.createThemedPath(newThemedPath);
 
@@ -28,7 +28,7 @@ public class ThemedPathController {
                 .buildAndExpand(createdThemedPath.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(createdThemedPath);
+        return ResponseEntity.created(location).body("Themed Path created successfully.");
     }
 
     @GetMapping("/{id}")

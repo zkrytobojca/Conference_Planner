@@ -21,7 +21,7 @@ public class LectureController {
     private final LectureService lectureService;
 
     @PostMapping
-    public ResponseEntity<Lecture> addNewLecture(@RequestBody LectureCreationElement lectureCreationElement) {
+    public ResponseEntity<String> addNewLecture(@RequestBody LectureCreationElement lectureCreationElement) {
         try{
             Lecture createdLecture = lectureService.createLecture(lectureCreationElement.getLecture(), lectureCreationElement.getThemedPathId());
 
@@ -30,10 +30,10 @@ public class LectureController {
                     .buildAndExpand(createdLecture.getId())
                     .toUri();
 
-            return ResponseEntity.created(location).body(createdLecture);
+            return ResponseEntity.created(location).body("Lecture created successfully.");
 
         } catch (NoThemedPathWithThisIDException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
