@@ -9,6 +9,7 @@ import com.sii.conference.data.statistics.IdPercentStat;
 import com.sii.conference.exceptions.lecture.LectureAlreadyFullException;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
 import com.sii.conference.exceptions.reservation.ReservationAlreadyExistsException;
+import com.sii.conference.exceptions.reservation.ReservationCollidesWithAnotherException;
 import com.sii.conference.exceptions.user.NoUserWithThisIDException;
 import com.sii.conference.exceptions.user.NoUserWithThisLoginAndEmailExistsException;
 import com.sii.conference.services.ReservationService;
@@ -41,7 +42,7 @@ public class ReservationController {
             return ResponseEntity.created(location).body("Reservation created successfully.");
 
         } catch (NoUserWithThisIDException | NoLectureWithThisIDException | LectureAlreadyFullException |
-        ReservationAlreadyExistsException e) {
+                 ReservationAlreadyExistsException | ReservationCollidesWithAnotherException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -59,7 +60,7 @@ public class ReservationController {
             return ResponseEntity.created(location).body("Reservation created successfully.");
 
         } catch (NoUserWithThisIDException | NoLectureWithThisIDException | LectureAlreadyFullException |
-                 ReservationAlreadyExistsException | NoUserWithThisLoginAndEmailExistsException e) {
+                 ReservationAlreadyExistsException | NoUserWithThisLoginAndEmailExistsException | ReservationCollidesWithAnotherException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

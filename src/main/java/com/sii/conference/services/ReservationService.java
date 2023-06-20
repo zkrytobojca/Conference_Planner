@@ -12,6 +12,7 @@ import com.sii.conference.data.statistics.IdPercentStat;
 import com.sii.conference.exceptions.lecture.LectureAlreadyFullException;
 import com.sii.conference.exceptions.lecture.NoLectureWithThisIDException;
 import com.sii.conference.exceptions.reservation.ReservationAlreadyExistsException;
+import com.sii.conference.exceptions.reservation.ReservationCollidesWithAnotherException;
 import com.sii.conference.exceptions.user.NoUserWithThisIDException;
 import com.sii.conference.exceptions.user.NoUserWithThisLoginAndEmailExistsException;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class ReservationService {
     @Value("${lecture.max-reservations}")
     private Integer maxReservations;
 
-    public Reservation createReservation(Reservation reservation, Integer userId, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException, LectureAlreadyFullException, ReservationAlreadyExistsException {
+    public Reservation createReservation(Reservation reservation, Integer userId, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException, LectureAlreadyFullException, ReservationAlreadyExistsException, ReservationCollidesWithAnotherException {
         Optional<Reservation> reservationOptional = reservationRepository.findReservationByUserIdAndLectureId(userId, lectureId);
         Optional<User> userOptional = userRepository.findUserById(userId);
         Optional<Lecture> lectureOptional = lectureRepository.findLectureById(lectureId);
@@ -52,6 +53,12 @@ public class ReservationService {
             Lecture lecture = lectureOptional.get();
             reservation.setLecture(lecture);
             if (reservationRepository.countByLectureId(lectureId) < maxReservations) {
+                List<Reservation> userReservations = reservationRepository.findAllByUserLoginOrderByIdAsc(user.getLogin());
+                for (Reservation userReservation : userReservations) {
+                    Lecture resLecture = userReservation.getLecture();
+                    if (resLecture.getStartTime().equals(lecture.getStartTime())) throw new ReservationCollidesWithAnotherException(String.format("Reservation collides with reservation with id {%d}", userReservation.getId()));
+                }
+
                 emailService.WriteToFile(user.getEmail(), "You reserved a spot in lecture: " + lecture.getTopic() + ".");
                 return reservationRepository.save(reservation);
             } else {
@@ -63,7 +70,7 @@ public class ReservationService {
         }
     }
 
-    public Reservation createReservation(Reservation reservation, String userLogin, String userEmail, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException, LectureAlreadyFullException, ReservationAlreadyExistsException, NoUserWithThisLoginAndEmailExistsException {
+    public Reservation createReservation(Reservation reservation, String userLogin, String userEmail, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException, LectureAlreadyFullException, ReservationAlreadyExistsException, NoUserWithThisLoginAndEmailExistsException, ReservationCollidesWithAnotherException {
         Optional<User> userOptional = userRepository.findUserByLoginAndEmail(userLogin, userEmail);
 
         if (userOptional.isPresent()) {
