@@ -1,6 +1,5 @@
 package com.sii.conference.data.elements;
 
-import com.sii.conference.data.Reservation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReservationCreationElement {
 
-    private Integer userid;
+    private Integer userId;
 
     private Integer lectureId;
 }

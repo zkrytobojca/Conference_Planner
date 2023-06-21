@@ -32,7 +32,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<String> addNewReservation(@RequestBody ReservationCreationElement reservationCreationElement) {
         try{
-            Reservation createdReservation = reservationService.createReservation(new Reservation(), reservationCreationElement.getUserid(), reservationCreationElement.getLectureId());
+            Reservation createdReservation = reservationService.createReservation(new Reservation(), reservationCreationElement.getUserId(), reservationCreationElement.getLectureId());
 
             URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("/{id}")
