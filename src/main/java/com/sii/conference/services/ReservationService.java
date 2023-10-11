@@ -39,34 +39,26 @@ public class ReservationService {
     private Integer maxReservations;
 
     public Reservation createReservation(Reservation reservation, Integer userId, Integer lectureId) throws NoUserWithThisIDException, NoLectureWithThisIDException, LectureAlreadyFullException, ReservationAlreadyExistsException, ReservationCollidesWithAnotherException {
-        Optional<Reservation> reservationOptional = reservationRepository.findReservationByUserIdAndLectureId(userId, lectureId);
-        Optional<User> userOptional = userRepository.findUserById(userId);
-        Optional<Lecture> lectureOptional = lectureRepository.findLectureById(lectureId);
+        validateIfReservationIsUnique(userId, lectureId);
+        User user = userRepository.findUserById(userId)
+                .orElseThrow(() -> new NoUserWithThisIDException(String.format("User with id {%d} not found", userId)));
+        Lecture lecture = lectureRepository.findLectureById(lectureId)
+                .orElseThrow(() -> new NoLectureWithThisIDException(String.format("Lecture with id {%d} not found", lectureId)));
 
-        if (reservationOptional.isPresent()) {
-            throw new ReservationAlreadyExistsException("Reservation already exists!");
-        }
-
-        if (userOptional.isPresent() && lectureOptional.isPresent()) {
-            User user = userOptional.get();
-            reservation.setUser(user);
-            Lecture lecture = lectureOptional.get();
-            reservation.setLecture(lecture);
-            if (reservationRepository.countByLectureId(lectureId) < maxReservations) {
-                List<Reservation> userReservations = reservationRepository.findAllByUserLoginOrderByIdAsc(user.getLogin());
-                for (Reservation userReservation : userReservations) {
-                    Lecture resLecture = userReservation.getLecture();
-                    if (resLecture.getStartTime().equals(lecture.getStartTime())) throw new ReservationCollidesWithAnotherException(String.format("Reservation collides with reservation with id {%d}", userReservation.getId()));
-                }
-
-                emailService.WriteToFile(user.getEmail(), "You reserved a spot in lecture: " + lecture.getTopic() + ".");
-                return reservationRepository.save(reservation);
-            } else {
-                throw new LectureAlreadyFullException("Lecture already full!");
+        reservation.setUser(user);
+        reservation.setLecture(lecture);
+        if (reservationRepository.countByLectureId(lectureId) < maxReservations) {
+            List<Reservation> userReservations = reservationRepository.findAllByUserLoginOrderByIdAsc(user.getLogin());
+            for (Reservation userReservation : userReservations) {
+                Lecture resLecture = userReservation.getLecture();
+                if (resLecture.getStartTime().equals(lecture.getStartTime()))
+                    throw new ReservationCollidesWithAnotherException(String.format("Reservation collides with reservation with id {%d}", userReservation.getId()));
             }
+
+            emailService.WriteToFile(user.getEmail(), "You reserved a spot in lecture: " + lecture.getTopic() + ".");
+            return reservationRepository.save(reservation);
         } else {
-            if (userOptional.isEmpty()) throw new NoUserWithThisIDException(String.format("User with id {%d} not found", userId));
-            else throw new NoLectureWithThisIDException(String.format("Lecture with id {%d} not found", lectureId));
+            throw new LectureAlreadyFullException("Lecture already full!");
         }
     }
 
@@ -203,5 +195,10 @@ public class ReservationService {
             }
         }
         return statistics;
+    }
+
+    private void validateIfReservationIsUnique(Integer userId, Integer lectureId) throws ReservationAlreadyExistsException {
+        reservationRepository.findReservationByUserIdAndLectureId(userId, lectureId)
+                .ifPresent(reservation -> {throw new ReservationAlreadyExistsException("Reservation already exists!");});
     }
 }
