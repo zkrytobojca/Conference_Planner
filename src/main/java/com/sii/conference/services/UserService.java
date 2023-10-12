@@ -3,6 +3,7 @@ package com.sii.conference.services;
 import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.UserRepository;
 import com.sii.conference.exceptions.user.UserWithThisLoginExistsException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +15,12 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-
+    @Transactional
     public User createUser(User user) throws UserWithThisLoginExistsException {
-        final Optional<User> userOptional = findUserByLogin(user.getLogin());
-
-        if(userOptional.isPresent()) {
-            throw new UserWithThisLoginExistsException("This login is already taken!");
-        } else {
-            return userRepository.save(user);
-        }
+        validateIfLoginIsUnique(user.getLogin());
+        return userRepository.save(user);
     }
-
+    @Transactional
     public Optional<User> updateUser(Integer id, User user) {
         final Optional<User> userOptional = findUserById(id);
 
@@ -51,5 +47,14 @@ public class UserService {
 
     public void deleteUser(User user) {
         userRepository.delete(user);
+    }
+
+    private void validateIfLoginIsUnique(String login) {
+        findUserByLogin(login)
+                .ifPresent(
+                        existingUser -> {
+                            throw new UserWithThisLoginExistsException("This login is already taken!");
+                        }
+                );
     }
 }

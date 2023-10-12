@@ -6,6 +6,7 @@ import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.LectureRepository;
 import com.sii.conference.data.repositories.ThemedPathRepository;
 import com.sii.conference.exceptions.themedpath.NoThemedPathWithThisIDException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ public class LectureService {
     private final LectureRepository lectureRepository;
 
     private final ThemedPathRepository themedPathRepository;
-
+    @Transactional
     public Lecture createLecture(Lecture lecture, Integer themedPathId) throws NoThemedPathWithThisIDException {
         Optional<ThemedPath> themedPathOptional = themedPathRepository.findThemedPathById(themedPathId);
         if (themedPathOptional.isPresent()) {
@@ -30,7 +31,7 @@ public class LectureService {
             throw new NoThemedPathWithThisIDException(String.format("Themed Path with id {%d} not found", themedPathId));
         }
     }
-
+    @Transactional
     public Optional<Lecture> updateLecture(Integer id, Lecture lecture) throws NoThemedPathWithThisIDException {
         final Optional<Lecture> lectureOptional = findLectureById(id);
 

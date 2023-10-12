@@ -3,6 +3,7 @@ package com.sii.conference.services;
 import com.sii.conference.data.ThemedPath;
 import com.sii.conference.data.User;
 import com.sii.conference.data.repositories.ThemedPathRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +15,11 @@ import java.util.Optional;
 public class ThemedPathService {
 
     private final ThemedPathRepository themedPathRepository;
-
+    @Transactional
     public ThemedPath createThemedPath(ThemedPath themedPath) {
         return themedPathRepository.save(themedPath);
     }
-
+    @Transactional
     public Optional<ThemedPath> updateThemedPath(Integer id, ThemedPath themedPath) {
         final Optional<ThemedPath> themedPathOptional = findThemedPathById(id);
 
